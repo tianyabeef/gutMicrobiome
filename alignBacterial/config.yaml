@@ -1,0 +1,6 @@
+__author__="huangy20160728"
+bin_dir: "/data_center_01/pipeline/gutMicrobiome_v1.0/snakemake"
+work_dir: "/data_center_06/Project/RY2014D20C01-1/"
+subwork_dir:
+  clead_data: 01.clean_reads
+  sample: sample_list

@@ -1,0 +1,9 @@
+__author__ = 'huangy 20160728'
+import os
+config: "config.yaml"
+pipeDir = config['bin_dir']
+rulesDir = os.path.join(os.path.expanduser(config['bin_dir']),"alignBacterial","rules")
+include: os.path.join(relesDir,"checkAlignErr.rules")
+include: os.path.join(relesDir,"soapAlign.rules")
+include: os.path.join(relesDir,"abundance.rules")
+

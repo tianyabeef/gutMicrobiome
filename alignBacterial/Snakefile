@@ -76,7 +76,8 @@ def getinput(reflist):
     return input
 
 samples_align =get_sample(clean_reads_listFile,reflist)
-
+print(samples_align)
+print(outDir)
 rule all:
     input: samples_align
 

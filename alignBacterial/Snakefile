@@ -1,50 +1,110 @@
 __author__ = 'huangy 20160728'
 import os
+import sys
 import glob
+from snakemake.utils import makedirs
 configfile: "config.yaml"
 pipeDir = config['bin_dir']
 rulesDir = os.path.join(os.path.expanduser(config['bin_dir']),"alignBacterial","rules")
-include: os.path.join(relesDir,"checkAlignErr.rules")
-include: os.path.join(relesDir,"soapAlign.rules")
-include: os.path.join(relesDir,"abundance.rules")
+include: os.path.join(rulesDir,"checkAlignErr.rules")
+include: os.path.join(rulesDir,"soapAlign.rules")
+include: os.path.join(rulesDir,"abundance.rules")
 workDir = config['work_dir']
 clean_reads_list = config["subwork_dir"]["clean_reads_list"]
 NCBI_Bacteria = config["NCBI_Bacteria"]
 NCBI_Archaea = config["NCBI_Archaea"]
 NCBI_Fungi = config["NCBI_Fungi"]
 NCBI_Virus = config["NCBI_Virus"]
-qsub_num = config["qsub_num"]
 clean_reads_listFile = "%s/%s"%(workDir,clean_reads_list)
-clean_reads = config["subwork_dir"]["clean_reads"]
-def get_sample(clean_reads_listFile):
+clean_reads_dir = "%s/%s"%(workDir,config["subwork_dir"]["clean_reads_dir"])
+outDir = "%s/02.align/alignment/"%(workDir)
+shelloutDir = "%s/02.align/shell_alignment/"%(workDir)
+referencesGenome = config["references"].split(",")
+
+def get_references_name():
+    reflist = []
+    for temp in referencesGenome:
+        if temp == "Bacteria":
+            with open(NCBI_Bacteria,"r") as fq2:
+                for line in fq2:
+                    tabs = line.strip().split("\t")
+                    refname = os.path.splitext(os.path.basename(tabs[1]))[0]
+                    reflist.append(refname)
+        elif temp == "Archaea":
+            with open(NCBI_Archaea,"r") as fq3:
+                for line in fq3:
+                    tabs = line.strip().split("\t")
+                    refname = os.path.splitext(os.path.basename(tabs[1]))[0]
+                    reflist.append(refname)
+        elif temp == "Fungi":
+            with open(NCBI_Fungi,"r") as fq4:
+                for line in fq4:
+                    tabs = line.strip().split("\t")
+                    refname = os.path.splitext(os.path.basename(tabs[1]))[0]
+                    reflist.append(refname)
+        elif temp == "Virus":
+            with open(NCBI_Virus,"r") as fq5:
+                for line in fq5:
+                    tabs = line.strip().split("\t")
+                    refname = os.path.splitext(os.path.basename(tabs[1]))[0]
+                    reflist.append(refname)
+        else:
+            sys.stderr.write("references Genome err")
+    return reflist
+reflist = get_references_name()
+print(reflist)
+
+def get_sample(clean_reads_listFile,reflist):
+    samples_align=[]
     with open(clean_reads_listFile,"r") as fq:
         for line in fq:
-            tabs = line.strip().split("\t")
-            sampleName=tabs[0]
-            fastq1 = tabs[1]
-            fastq2 = tabs[2]
-            with open("%s/database_list"%(NCBI_Fungi),"r") as fq2 , open("match_list","w") as fqout:
-                for line2 in fq2:
-                    reference = line2.strip()
-                    yield (sampleName,fastq1,fastq2,reference)
+            tabs1 = line.strip().split("\t")
+#            for refname in reflist:
+            samples_align.append("%s/%s/%s.species.abundance"%(outDir,tabs1[0],tabs1[0]))
+    return samples_align
 
+def get_sample2(clean_reads_listFile):
+    with open(clean_reads_listFile,"r") as fq:
+            for line in fq:
+                tabs1 = line.strip().split("\t")
+                yield tabs1[0]
 
+def getinput(reflist):
+    input=[]
+    for tempRef in reflist:
+        input.append("%s/{sample}/{sample}__%s.pm"%(outDir,tempRef),)
+    return input
 
-            outDir = "%s/02.align/%s/"%(workDir,sampleName)
-def reference():
-    with open("%s/database_list"%(NCBI_Fungi),"r") as fq2 , open("match_list","w") as fqout:
-                for line2 in fq2:
-                    reference = line2.strip()
-                    yield reference
+samples_align =get_sample(clean_reads_listFile,reflist)
+
+rule all:
+    input: samples_align
 
 rule align:
     input:
-        a: "%s{sampleName}.1.fq.gz"%clean_reads,
-        b: "%s{sampleName}.2.fq.gz"%clean_reads,
-        r: reference
+        "%s/{sample}.1.fq.gz"%clean_reads_dir,
+        "%s/{sample}.2.fq.gz"%clean_reads_dir,
+        "/data_center_06/Database/Database_ls/{ref}.fasta"
     output:
-        o1: "%s/%s.pm"%(outDir,sampleName),
-        o2: "%s/%s.sm"%(outDir,sampleName)
-    shell: "echo -a {input.a} -b {input.b} -D {input.r}.index -M 4 -o {output.o1} -2 {output.o2} -r 2 -p 10 -m 100 -x 1000"
+        "%s/{sample}/{sample}__{ref}.pm"%outDir,
+        "%s/{sample}/{sample}__{ref}.sm"%outDir,
+        "%s/{sample}/{sample}__{ref}.log"%shelloutDir
+    shell: "echo soap -a {input[0]} -b {input[1]} -D {input[2]}.index -M 4 -o {output[0]} -2 {output[1]} -r 2 -p 10 -m 100 -x 1000 > {output[2]}"
 
+rule check:
+    input:
+        bb=getinput(reflist)
+    output:
+        "%s/{sample}/{sample}.check.log"%shelloutDir,
+        "%s/{sample}/{sample}.match.list"%outDir
+    shell: "echo python check.py -i {input.bb} -o {output[0]}"
 
+rule abund:
+    input: "%s/{sample}/{sample}.match.list"%outDir
+    output: "%s/{sample}/{sample}.MATCH"%outDir
+    shell: "echo python config[\"alignmet_parse\"] -i input[0] -o output[0] -t PE"
+rule abund_profile:
+    input: "%s/{sample}/{sample}.MATCH"%outDir
+    output: "%s/{sample}/{sample}.species.abundance"%outDir,
+        "%s/{sample}/{sample}.MATCH.log"%outDir
+    shell: "echo python config[\"species_abundance_profiler\"] -i input[0] -o output[0] -log output[1]"

@@ -1,11 +1,12 @@
-__author__="huangy20160728"
 bin_dir: "/data_center_01/pipeline/gutMicrobiome_v1.0/snakemake"
-work_dir: "/data_center_06/Project/RY2014D20C01-1/"
+work_dir: "/data_center_06/Project/RY2014D20C01-1"
 subwork_dir:
   clean_reads_list: "01.clean_reads/clean_reads_list"
-  clean_reads: "/01.clean_reads/"
+  clean_reads_dir: "01.clean_reads"
 NCBI_Bacteria: "/data_center_06/Database/NCBI_Bacteria/20160422/database/species_database.list"
 NCBI_Archaea: "/data_center_06/Database/NCBI_Archaea/20160525/database/archaea_database.list"
 NCBI_Fungi: "/data_center_06/Database/NCBI_Fungi/20160601/database/fungi_database.list"
 NCBI_Virus: "/data_center_06/Database/NCBI_Virus/20160615/database/viral.database.list"
-qsub_num: 20
+references: "Bacteria,Archaea,Fungi,Virus"
+alignmet_parse: "/data_center_01/pipeline/huangy/metagenome/database/alignment_parse2.py"
+species_abundance_profiler: "/data_center_01/pipeline/huangy/metagenome/database/species_abundance_profiler.py"

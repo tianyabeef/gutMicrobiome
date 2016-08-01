@@ -4,6 +4,7 @@ Tests for Snakemake’s API
 from snakemake import snakemake
 import tempfile
 import os.path
+from snakemake.utils import makedirs
 
 def test_keep_logger():
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -11,3 +12,4 @@ def test_keep_logger():
         with open(path, 'w') as f:
             print("rule:\n  output: 'result.txt'\n  shell: 'touch {output}'", file=f)
         snakemake(path, workdir=tmpdir, keep_logger=True)
+

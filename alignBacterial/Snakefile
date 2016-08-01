@@ -90,7 +90,7 @@ rule align:
         "%s/{sample}/{sample}__{ref}.pm"%outDir,
         "%s/{sample}/{sample}__{ref}.sm"%outDir,
         "%s/{sample}/{sample}__{ref}.log"%shelloutDir
-    shell: "echo soap -a {input[0]} -b {input[1]} -D {input[2]}.index -M 4 -o {output[0]} -2 {output[1]} -r 2 -p 10 -m 100 -x 1000 > {output[2]}"
+    shell: "soap -a {input[0]} -b {input[1]} -D {input[2]}.index -M 4 -o {output[0]} -2 {output[1]} -r 2 -p 10 -m 100 -x 1000 > {output[2]}"
 
 rule check:
     input:
@@ -98,14 +98,14 @@ rule check:
     output:
         "%s/{sample}/{sample}.check.log"%shelloutDir,
         "%s/{sample}/{sample}.match.list"%outDir
-    shell: "echo python check.py -i {input.bb} -o {output[0]}"
+    shell: "python check.py -i {input.bb} -o {output[0]}"
 
 rule abund:
     input: "%s/{sample}/{sample}.match.list"%outDir
     output: "%s/{sample}/{sample}.MATCH"%outDir
-    shell: "echo python config[\"alignmet_parse\"] -i input[0] -o output[0] -t PE"
+    shell: "python config[\"alignmet_parse\"] -i input[0] -o output[0] -t PE"
 rule abund_profile:
     input: "%s/{sample}/{sample}.MATCH"%outDir
     output: "%s/{sample}/{sample}.species.abundance"%outDir,
         "%s/{sample}/{sample}.MATCH.log"%outDir
-    shell: "echo python config[\"species_abundance_profiler\"] -i input[0] -o output[0] -log output[1]"
+    shell: "python config[\"species_abundance_profiler\"] -i input[0] -o output[0] -log output[1]"

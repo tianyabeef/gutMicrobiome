@@ -1,0 +1,3 @@
+source activate gutbio
+snakemake --cluster-config cluster.yaml --cluster  'qsub -o {cluster.qsublog}' -j 40
+source deactivate 

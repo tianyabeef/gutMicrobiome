@@ -9,4 +9,4 @@ dist/
 .eggs/
 .snakemake*
 .idea/
-./alignBacterial/log/*
+alignBacterial/log/*

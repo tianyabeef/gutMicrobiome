@@ -1,0 +1,9 @@
+__default__:
+vf: 5g
+queue: all.q
+align:
+vf: 20g
+queue: all.q,big.q
+abund:
+vf: 20g
+queue: all.q,big.q

@@ -1,0 +1,10 @@
+rule all:
+    input: "input1.txt", "input2.txt"
+
+rule compute1:
+    output: "input1.txt"
+    shell: "touch input1.txt"
+
+rule compute2:
+    output: "input2.txt"
+    shell: "touch input2.txt"

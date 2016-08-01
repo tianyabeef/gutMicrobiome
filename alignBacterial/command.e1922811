@@ -169,3 +169,32 @@ rule align:
 	input: /data_center_05/Project/gutMicrobiome//01.clean_reads/AS127.1.fq.gz, /data_center_05/Project/gutMicrobiome//01.clean_reads/AS127.2.fq.gz, /data_center_06/Database/Database_ls/33.fasta
 	output: /data_center_05/Project/gutMicrobiome//02.align/alignment//AS127/AS127__33.pm, /data_center_05/Project/gutMicrobiome//02.align/alignment//AS127/AS127__33.sm, /data_center_05/Project/gutMicrobiome//02.align/shell_alignment//AS127/AS127__33.log
 	wildcards: sample=AS127, ref=33
+1 of 1401 steps (0%) done
+rule align:
+	input: /data_center_05/Project/gutMicrobiome//01.clean_reads/AS122.1.fq.gz, /data_center_05/Project/gutMicrobiome//01.clean_reads/AS122.2.fq.gz, /data_center_06/Database/Database_ls/26.fasta
+	output: /data_center_05/Project/gutMicrobiome//02.align/alignment//AS122/AS122__26.pm, /data_center_05/Project/gutMicrobiome//02.align/alignment//AS122/AS122__26.sm, /data_center_05/Project/gutMicrobiome//02.align/shell_alignment//AS122/AS122__26.log
+	wildcards: sample=AS122, ref=26
+Error in job align while creating output files /data_center_05/Project/gutMicrobiome//02.align/alignment//AS127/AS127__27.pm, /data_center_05/Project/gutMicrobiome//02.align/alignment//AS127/AS127__27.sm, /data_center_05/Project/gutMicrobiome//02.align/shell_alignment//AS127/AS127__27.log.
+ClusterJobException in line 84 of /data_center_01/pipeline/gutMicrobiome_v1.0/snakemake/alignBacterial/Snakefile:
+Error executing rule align on cluster (jobid: 9, jobscript: /data_center_01/pipeline/gutMicrobiome_v1.0/snakemake/alignBacterial/.snakemake/tmp.9675I1/snakejob.align.9.sh). For detailed error see the cluster log.
+Will exit after finishing currently running jobs.
+2 of 1401 steps (0%) done
+Will exit after finishing currently running jobs.
+3 of 1401 steps (0%) done
+Will exit after finishing currently running jobs.
+4 of 1401 steps (0%) done
+Will exit after finishing currently running jobs.
+5 of 1401 steps (0%) done
+Will exit after finishing currently running jobs.
+6 of 1401 steps (0%) done
+Will exit after finishing currently running jobs.
+7 of 1401 steps (0%) done
+Will exit after finishing currently running jobs.
+8 of 1401 steps (1%) done
+Will exit after finishing currently running jobs.
+9 of 1401 steps (1%) done
+Will exit after finishing currently running jobs.
+10 of 1401 steps (1%) done
+Will exit after finishing currently running jobs.
+11 of 1401 steps (1%) done
+Will exit after finishing currently running jobs.

@@ -10,3 +10,4 @@ dist/
 .snakemake*
 .idea/
 alignBacterial/log/*
+alignBacterial/command.*

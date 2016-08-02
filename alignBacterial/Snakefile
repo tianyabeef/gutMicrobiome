@@ -52,7 +52,6 @@ def get_references_name():
             sys.stderr.write("references Genome err")
     return reflist
 reflist = get_references_name()
-print(reflist)
 
 def get_sample(clean_reads_listFile,reflist):
     samples_align=[]
@@ -76,8 +75,6 @@ def getinput(reflist):
     return input
 
 samples_align =get_sample(clean_reads_listFile,reflist)
-print(samples_align)
-print(outDir)
 rule all:
     input: samples_align
 
@@ -98,7 +95,7 @@ rule check:
     output:
         "%s/{sample}/{sample}.check.log"%shelloutDir,
         "%s/{sample}/{sample}.match.list"%outDir
-    shell: "python check.py -i {input.bb} -o {output[0]}"
+    shell: "python check.py -i {input.bb} -o {output[1]}"
 
 rule abund:
     input: "%s/{sample}/{sample}.match.list"%outDir

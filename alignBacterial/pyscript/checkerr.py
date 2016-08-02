@@ -23,4 +23,4 @@ if __name__ == '__main__':
     outputDir = param["outputdir"]
     with open("%s"%outputDir,"w") as fqout:
         for temp in inputFile.split(","):
-            fqout.write("%s\n"%temp)
+            fqout.write("PE\t%s\n"%temp)

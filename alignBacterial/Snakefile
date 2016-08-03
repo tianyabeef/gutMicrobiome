@@ -10,13 +10,13 @@ include: os.path.join(rulesDir,"checkAlignErr.rules")
 include: os.path.join(rulesDir,"soapAlign.rules")
 include: os.path.join(rulesDir,"abundance.rules")
 workDir = config['work_dir']
-clean_reads_list = config["subwork_dir"]["clean_reads_list"]
+clean_reads_list = config["clean_reads_list"]
 NCBI_Bacteria = config["NCBI_Bacteria"]
 NCBI_Archaea = config["NCBI_Archaea"]
 NCBI_Fungi = config["NCBI_Fungi"]
 NCBI_Virus = config["NCBI_Virus"]
 clean_reads_listFile = "%s/%s"%(workDir,clean_reads_list)
-clean_reads_dir = "%s/%s"%(workDir,config["subwork_dir"]["clean_reads_dir"])
+clean_reads_dir = "%s/%s"%(workDir,config["clean_reads_dir"])
 outDir = "%s/02.align/alignment/"%(workDir)
 shelloutDir = "%s/02.align/shell_alignment/"%(workDir)
 referencesGenome = config["references"].split(",")
@@ -71,7 +71,8 @@ def get_sample2(clean_reads_listFile):
 def getinput(reflist):
     input=[]
     for tempRef in reflist:
-        input.append("%s/{sample}/{sample}__%s.pm"%(outDir,tempRef),)
+        input.append("%s/{sample}/{sample}__%s.pm"%(outDir,tempRef))
+	
     return input
 
 samples_align =get_sample(clean_reads_listFile,reflist)
@@ -95,14 +96,14 @@ rule check:
     output:
         "%s/{sample}/{sample}.check.log"%shelloutDir,
         "%s/{sample}/{sample}.match.list"%outDir
-    shell: "python check.py -i {input.bb} -o {output[1]}"
+    shell: "python %s -i {input.bb} -o {output[1]}"%config["check"]
 
 rule abund:
     input: "%s/{sample}/{sample}.match.list"%outDir
     output: "%s/{sample}/{sample}.MATCH"%outDir
-    shell: "python config[\"alignmet_parse\"] -i input[0] -o output[0] -t PE"
+    shell: "python %s -i input[0] -o output[0] -t PE"%config["alignmet_parse"]
 rule abund_profile:
     input: "%s/{sample}/{sample}.MATCH"%outDir
     output: "%s/{sample}/{sample}.species.abundance"%outDir,
         "%s/{sample}/{sample}.MATCH.log"%outDir
-    shell: "python config[\"species_abundance_profiler\"] -i input[0] -o output[0] -log output[1]"
+    shell: "python %s -i input[0] -o output[0] -log output[1]"%config["species_abundance_profiler"]

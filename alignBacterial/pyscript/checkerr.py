@@ -21,6 +21,8 @@ if __name__ == '__main__':
     param = read_params(sys.argv)
     inputFile = param['input']
     outputDir = param["outputdir"]
+    print(inputFile)
     with open("%s"%outputDir,"w") as fqout:
         for temp in inputFile.split(","):
+	    print(temp)
             fqout.write("PE\t%s\n"%temp)

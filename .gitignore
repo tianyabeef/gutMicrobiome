@@ -8,6 +8,6 @@ dist/
 *.egg
 .eggs/
 .snakemake*
-.idea/
+.idea/*
 alignBacterial/log/*
 alignBacterial/command.*

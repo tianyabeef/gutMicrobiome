@@ -17,8 +17,8 @@ NCBI_Fungi = config["NCBI_Fungi"]
 NCBI_Virus = config["NCBI_Virus"]
 clean_reads_listFile = "%s/%s"%(workDir,clean_reads_list)
 clean_reads_dir = "%s/%s"%(workDir,config["clean_reads_dir"])
-outDir = "%s/02.align/alignment/"%(workDir)
-shelloutDir = "%s/02.align/shell_alignment/"%(workDir)
+outDir = "%s/02.taxon/alignment/"%(workDir)
+shelloutDir = "%s/02.taxon/shell_alignment/"%(workDir)
 referencesGenome = config["references"].split(",")
 
 def get_references_name():
@@ -52,14 +52,12 @@ def get_references_name():
             sys.stderr.write("references Genome err")
     return reflist
 reflist = get_references_name()
-
 def get_sample(clean_reads_listFile,reflist):
     samples_align=[]
     with open(clean_reads_listFile,"r") as fq:
         for line in fq:
             tabs1 = line.strip().split("\t")
-#            for refname in reflist:
-            samples_align.append("%s/%s/%s.species.abundance"%(outDir,tabs1[0],tabs1[0]))
+            samples_align.append("%s/%s/%s.rm.logs"%(outDir,tabs1[0],tabs1[0]))
     return samples_align
 
 def get_sample2(clean_reads_listFile):
@@ -68,11 +66,22 @@ def get_sample2(clean_reads_listFile):
                 tabs1 = line.strip().split("\t")
                 yield tabs1[0]
 
-def getinput(reflist):
+def getinput(reflist,name):
     input=[]
     for tempRef in reflist:
-        input.append("%s/{sample}/{sample}__%s.pm"%(outDir,tempRef))
-	
+    	if name=="PE":
+    		input.append("%s/{sample}/{sample}__%s.pm"%(outDir,tempRef))
+    	if name=="SE":
+    		input.append("%s/{sample}/{sample}__%s.sm"%(outDir,tempRef))
+    return input
+
+
+def getinputall(reflist):
+    input=[]
+    for tempRef in reflist:
+    	input.append("%s/{sample}/{sample}__%s.sm"%(outDir,tempRef))
+    	input.append("%s/{sample}/{sample}__%s.pm"%(outDir,tempRef))
+    	input.append("%s/{sample}/{sample}__%s.MATCH.log"%(outDir,tempRef))
     return input
 
 samples_align =get_sample(clean_reads_listFile,reflist)
@@ -81,29 +90,53 @@ rule all:
 
 rule align:
     input:
-        "%s/{sample}.1.fq.gz"%clean_reads_dir,
-        "%s/{sample}.2.fq.gz"%clean_reads_dir,
-        "/data_center_06/Database/Database_ls/{ref}.fasta"
+    	"%s/{sample}.1.fq.gz"%clean_reads_dir,
+    	"%s/{sample}.2.fq.gz"%clean_reads_dir,
+    	"/data_center_06/Database/Database_ls_20160826/{ref}.fasta"
     output:
-        "%s/{sample}/{sample}__{ref}.pm"%outDir,
-        "%s/{sample}/{sample}__{ref}.sm"%outDir,
-        "%s/{sample}/{sample}__{ref}.log"%shelloutDir
-    shell: "soap -a {input[0]} -b {input[1]} -D {input[2]}.index -M 4 -o {output[0]} -2 {output[1]} -r 2 -p 10 -m 100 -x 1000 > {output[2]}"
+    	"%s/{sample}/{sample}__{ref}.pm"%outDir,
+    	"%s/{sample}/{sample}__{ref}.sm"%outDir
+    shell: "soap -a {input[0]} -b {input[1]} -D {input[2]}.index -M 4 -o {output[0]} -2 {output[1]}  -r 2 -p 10 -m 100 -x 1000 "
 
 rule check:
     input:
-        bb=getinput(reflist)
+    	pe = getinput(reflist,"PE"),
+    	se = getinput(reflist,"SE")
     output:
-        "%s/{sample}/{sample}.check.log"%shelloutDir,
         "%s/{sample}/{sample}.match.list"%outDir
-    shell: "python %s -i {input.bb} -o {output[1]}"%config["check"]
+    run: 
+    	with open(output[0],'w') as fqout:
+        	for ttemp in input.pe:
+            		fqout.write("PE\t%s\n"%ttemp)
+        	for ttempse in input.se:
+            		fqout.write("SE\t%s\n"%ttempse)
 
 rule abund:
     input: "%s/{sample}/{sample}.match.list"%outDir
     output: "%s/{sample}/{sample}.MATCH"%outDir
-    shell: "python %s -i input[0] -o output[0] -t PE"%config["alignmet_parse"]
+    shell: "python %s -i {input[0]} -o {output[0]} -t PE"%config["alignmet_parse"]
 rule abund_profile:
     input: "%s/{sample}/{sample}.MATCH"%outDir
-    output: "%s/{sample}/{sample}.species.abundance"%outDir,
-        "%s/{sample}/{sample}.MATCH.log"%outDir
-    shell: "python %s -i input[0] -o output[0] -log output[1]"%config["species_abundance_profiler"]
+    output: 
+    	"%s/{sample}/{sample}.species.abundance"%outDir,
+        "%s/{sample}/{sample}.MATCH.logs"%outDir
+    shell: "python %s -i {input[0]} -o {output[0]} -log {output[1]} "%config["species_abundance_profiler"]
+rule remove: 
+    input:
+    	rmmatch = "%s/{sample}/{sample}.match.list"%outDir, 
+    	o1="%s/{sample}/{sample}.MATCH"%outDir,
+	o2="%s/{sample}/{sample}.species.abundance"%outDir
+    output: "%s/{sample}/{sample}.rm.logs"%outDir,
+    run: 
+    	with open(input.rmmatch,"r") as fq:
+        	for ttemp in fq:
+                	tabs= ttemp.strip().split("\t")
+                	t = os.path.exists(tabs[1])
+                	if not t:
+                        	raise TypeError("no have %s file!"%tabs[1])
+    	with open(input.rmmatch,"r") as fq:
+        	for ttemp in fq:
+                	tabs= ttemp.strip().split("\t")
+                	shell("rm %s "%tabs[1])
+        	shell("touch %s"%output)
+

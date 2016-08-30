@@ -1,0 +1,3 @@
+source activate gutbio
+snakemake --cluster-config cluster.yaml --cluster 'qsub -o {cluster.qsublog} -e {cluster.qsublog} -l vf={cluster.vf}' -j 30 --config clean_reads_list="02.tax/clean_reads_list/clean_reads_list0740"
+source deactivate

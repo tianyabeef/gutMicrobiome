@@ -10,4 +10,5 @@ dist/
 .snakemake*
 .idea/*
 alignBacterial/log/*
-alignBacterial/command.*
+alignBacterial/command*
+alignBacterial/Snakefile_bf
